@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+library(patchwork)
+scheme = read_tsv("./data/V4.bed", col_names =c("chromosome","start","end","name","e","strand"))
+
+
+
+the_start = region-600
+the_end =  region+600
+
+scheme=scheme %>% filter(start>the_start)%>% filter(start<the_end)
+
+region = 21986
+top<-ggplot(scheme,aes(xmin=start,xmax=end,y=name))+geom_errorbarh()+xlim(the_start,the_end)+theme_bw()
+
+differences = read_delim("./ref_differences.tsv",col_names = c("Genome","Position","Residue") ,delim=" ")
+bottom = ggplot(differences,aes(x=Position,y=Genome,color=Residue))+geom_point()+xlim(the_start,the_end)+theme_bw()
+
+top/bottom+  plot_layout(heights = c(1, 3))
+
+differences %>% filter(Residue=="-")%>% filter(Position>the_start)%>% filter(Position<the_end)
+
+
+```
+
+
+```{r}
+metadata = read_csv("./processed_metadata.csv")
+metadata
+t85 = read_delim("./t85.csv",delim=" ",col_names=c("sequence_name","position","residue"))
+both = inner_join(metadata,t85)
+both$week = lubridate::floor_date(both$sample_date,"weeks")
+ggplot(both%>% filter(residue!="N"),aes(x=week,fill=residue))  +geom_bar(position="fill")
+
+ggplot(both%>% filter(residue!="N"),aes(x=lineage,fill=residue))  +geom_bar(position="fill")
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

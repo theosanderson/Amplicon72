@@ -25,9 +25,9 @@ df['full_lineage'] = df['lineage'].apply(expand_alias)
 
 df = df[(df['full_lineage']+".").str.startswith('B.1.617.2.')]
 
-df = df[df['sample_date']>"2021-09-01"]
+df = df[df['sample_date']>"2021-09-08"]
 
-df = df.sample(frac=0.001)
+df = df.sample(frac=0.1)
 
 
 
@@ -42,5 +42,5 @@ ref_sequence = str(reference.seq)
 for record in SeqIO.parse(lzma.open(alignment_file, 'rt'), 'fasta'):
     if record.id in df['sequence_name'].values:
         for index, residue in enumerate(list(record.seq)):
-            if residue != ref_sequence[index] and residue !="N":
+            if residue != ref_sequence[index]:
                 print(record.id,index+1,residue)
